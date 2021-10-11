@@ -1,4 +1,5 @@
 var issueContainerEl = document.querySelector("#issues-container");
+var limitWarningEl = document.querySelector("#limit-warning");
 
 var getRepoIssues = function(repo) {
     var apiURL = "http://api.github.com/repos/" + repo + "/issues?direction=asc";
@@ -9,6 +10,11 @@ var getRepoIssues = function(repo) {
             response.json().then(function(data) {
                 // pass response data to DOM function
                 displayIssues(data);
+
+                // check if api has paginated issues
+                if (response.headers.get("Link")) {
+                    displayWarning(repo);
+                }
             })
         } else {
             alert("There was a problem with your request!")
@@ -48,4 +54,14 @@ var displayIssues = function(issues) {
     }
 }
 
-getRepoIssues("sophiabarrett/git-it-done");
+var displayWarning = function(repo) {
+    limitWarningEl.textContent = "This repository has more than 30 issues. ";
+
+    var linkEl = document.createElement("a");
+    linkEl.textContent = "See more issues on GitHub.com";
+    linkEl.setAttribute("href", "https://github.com/" + repo + "/issues");
+    linkEl.setAttribute("target", "_blank");
+    limitWarningEl.appendChild(linkEl);
+}
+
+getRepoIssues("angular/angular");
